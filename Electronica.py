@@ -56,6 +56,29 @@ def registrar_ingreso(ingresos):
     print("\nTelevisor registrado correctamente.")
     print("Codigo asignado: ", codigo)
 
+def buscar_registro(ingresos):
+    if len(ingresos) == 0:
+        print("Todavia no hay televisores registrados.")
+        return
+
+    codigo = leer_texto(
+        "Ingrese el codigo del televisor: "
+    ).upper()
+
+    for ingreso in ingresos:
+        if ingreso["codigo"] == codigo:
+            print("\n---------- DATOS DEL TELEVISOR ----------")
+            print("Codigo: ", ingreso["codigo"])
+            print("Clientes: ", ingreso["cliente"])
+            print("Celular: ", ingreso["celular"])
+            print("Marca: ", ingreso["marca"])
+            print("Modelo: ", ingreso["modelo"])
+            print("Numero de serie: ", ingreso["serie"])
+            return
+
+    print("No se encontro un registro con ese codigo.")
+                                        
+
 def main():
     ingresos = []
     opcion = ""
@@ -76,7 +99,7 @@ def main():
             registrar_ingreso(ingresos)
 
         elif opcion == "2":
-            print("Pendiente")
+            buscar_registro(ingresos)
 
         elif opcion == "3":
             print("Pendiente")
