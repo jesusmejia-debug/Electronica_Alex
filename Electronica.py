@@ -49,6 +49,7 @@ def registrar_ingreso(ingresos):
         "marca": marca,
         "modelo": modelo,
         "serie": serie,
+        "estado": "En reparacion"
     }
 
     ingresos.append(ingreso)
@@ -74,10 +75,46 @@ def buscar_registro(ingresos):
             print("Marca: ", ingreso["marca"])
             print("Modelo: ", ingreso["modelo"])
             print("Numero de serie: ", ingreso["serie"])
+            print("Estado: ", ingreso["estado"])
             return
 
     print("No se encontro un registro con ese codigo.")
                                         
+def actualizar_estado(ingresos):
+    if len(ingresos) == 0:
+        print("Todavia no hay televisores registrados.")
+        return
+
+    codigo = leer_texto("Ingrese el codigo del televisor: ").upper()
+
+    for ingreso in ingresos:
+        if ingreso["codigo"] == codigo:
+            print("\nEstado actual: ", ingreso["estado"])
+            print("1. En reparacion")
+            print("2. Reparado")
+            print("3. Entregado")
+
+            opcion_estado = input("Seleccione el nuevo estado: ").strip()
+
+            if opcion_estado == "1":
+                ingreso["estado"] = "En reparacion"
+
+            elif opcion_estado == "2":
+                ingreso["estado"] = "Reparado"
+
+            elif opcion_estado == "3":
+                ingreso["estado"] = "Entregado"
+
+            else:
+                print("Opcion de estado invalida.")
+                return
+
+            print("Estado actualizado correctamente.")
+            print("Nuevo estado: ", ingreso["estado"])
+            return
+
+    print("No se encontro un televisor con ese codigo.")
+
 
 def main():
     ingresos = []
@@ -102,7 +139,7 @@ def main():
             buscar_registro(ingresos)
 
         elif opcion == "3":
-            print("Pendiente")
+            actualizar_estado(ingresos)
 
         elif opcion == "4":
             print("Pendiente")
