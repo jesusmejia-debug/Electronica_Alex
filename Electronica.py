@@ -1,6 +1,7 @@
 def validar_texto(texto):
     return len(texto.strip()) > 0
 
+
 def validar_celular(celular):
     return(
         celular.isdigit()
@@ -8,8 +9,14 @@ def validar_celular(celular):
         and celular.startswith("9")
     )
 
+
+def validar_dni(dni):
+    return dni.isdigit() and len(dni) == 8
+
+
 def validar_precio(precio):
     return precio >= 0
+
 
 def leer_texto(mensaje):
     texto = input(mensaje).strip()
@@ -20,6 +27,7 @@ def leer_texto(mensaje):
 
     return texto
 
+
 def leer_celular():
     celular = input("Numero de celular (9 digitos): ").strip()
 
@@ -28,6 +36,17 @@ def leer_celular():
         celular = input("Numero de celular (9 digitos):").strip()
 
     return celular
+
+
+def leer_dni():
+    dni = input("DNI del cliente: ").strip()
+
+    while not validar_dni(dni):
+        print("Error: el DNI debe tener 8 digitos.")
+        dni = input("DNI del cliente: ").strip()
+
+    return dni
+
 
 def leer_precio(mensaje):
     while True:
@@ -42,8 +61,11 @@ def leer_precio(mensaje):
         except ValueError:
             print("Error: ingrese un precio valido.")
 
+
 def registrar_ingreso(ingresos):
     print("\n------- REGISTRO DE TELEVISOR -------")
+
+    dni = leer_dni()
 
     cliente = leer_texto("Nombre del cliente: ")
     celular = leer_celular()
@@ -67,10 +89,11 @@ def registrar_ingreso(ingresos):
 
     fecha = leer_texto("Fecha de ingreso (dd/mm/aaaa): ")
 
-    codigo = "TV-" + str(len(ingresos) + 1)
+    codigo = dni
 
     ingreso = {
         "codigo": codigo,
+        "dni": dni,
         "cliente": cliente,
         "celular": celular,
         "marca": marca,
@@ -85,7 +108,9 @@ def registrar_ingreso(ingresos):
     ingresos.append(ingreso)
 
     print("\nTelevisor registrado correctamente.")
+    print("DNI del cliente: ", dni)
     print("Codigo asignado: ", codigo)
+
 
 def buscar_registro(ingresos):
     if len(ingresos) == 0:
@@ -93,20 +118,20 @@ def buscar_registro(ingresos):
         return
 
     criterio = leer_texto(
-        "Ingrese nombre, celular o codigo: "
+        "Ingrese DNI, nombre o celular: "
     ).lower()
 
     encontrados = 0
 
     for ingreso in ingresos:
         if (
-            ingreso["codigo"].lower() == criterio
+            ingreso["dni"] == criterio
             or ingreso["cliente"].lower() == criterio
             or ingreso["celular"] == criterio
         ):
             print("\n---------- DATOS DEL TELEVISOR ----------")
-            print("Codigo: ", ingreso["codigo"])
-            print("Clientes: ", ingreso["cliente"])
+            print("DNI: ", ingreso["dni"])
+            print("Cliente: ", ingreso["cliente"])
             print("Celular: ", ingreso["celular"])
             print("Marca: ", ingreso["marca"])
             print("Modelo: ", ingreso["modelo"])
@@ -127,26 +152,35 @@ def actualizar_estado(ingresos):
         print("Todavia no hay televisores registrados.")
         return
 
-    codigo = leer_texto("Ingrese el codigo del televisor: ").upper()
+    dni = leer_dni()
+    encontrados = []
 
     for ingreso in ingresos:
-        if ingreso["codigo"].upper() == codigo:
-            print("\n---------- DATOS DEL TELEVISOR ----------")
-            print("Codigo: ", ingreso["codigo"])
-            print("Cliente: ", ingreso["cliente"])
-            print("Celular: ", ingreso["celular"])
-            print("Marca: ", ingreso["marca"])
-            print("Modelo: ", ingreso["modelo"])
-            print("Numero de serie: ", ingreso["serie"])
-            print("Falla reportada: ", ingreso["falla"])
-            print("Presupuesto: S/", ingreso["presupuesto"])
-            print("Fecha de ingreso: ", ingreso["fecha"])
-            print("Estado actual: ", ingreso["estado"])
+        if ingreso["dni"] == dni:
+            encontrados.append(ingreso)
 
+    if len(encontrados) == 0:
+        print("No se encontraron registros con ese DNI.")
+        return
+
+    print("\n---------- DATOS DEL TELEVISOR ----------")
+
+    for ingreso in encontrados:
+        print("\nMarca: ", ingreso["marca"])
+        print("Modelo: ", ingreso["modelo"])
+        print("Numero de serie: ", ingreso["serie"])
+        print("Estado: ", ingreso["estado"])
+        print("--------------------------------------")
+
+    serie = leer_texto("Ingrese el numero de serie del televisor: ")
+
+    for ingreso in encontrados:
+        if ingreso["serie"].lower() == serie.lower():
+            print("\nEstado actual: ", ingreso["estado"])
             print("1. En reparacion")
             print("2. Reparado")
             print("3. Entregado")
-
+                
             opcion_estado = input("Seleccione el nuevo estado: ").strip()
 
             if opcion_estado == "1":
@@ -168,7 +202,10 @@ def actualizar_estado(ingresos):
 
             if ingreso["estado"] == "Reparado":
                 print("Contactar al cliente al: ",ingreso["celular"])
+
             return
+
+    print("No se encontro un televisor con ese numero de serie.")
 
 
 def main():
@@ -178,7 +215,7 @@ def main():
     while opcion != "7":
         print("\n========== ELECTRONICA ALEX ==========")
         print("1. Registrar ingreso de televisor")
-        print("2. Buscar registro por nombre, celular o codigo")
+        print("2. Buscar registro por DNI, nombre o celular")
         print("3. Actualizar estado")
         print("4. Registrar compra de repuesto")
         print("5. Listar ingresos completos")
@@ -214,8 +251,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-
-
-
-    
