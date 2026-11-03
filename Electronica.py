@@ -145,7 +145,24 @@ def buscar_registro(ingresos):
 
     if encontrados == 0:
         print("No se encontraron registros.")
+def listar_ingresos(ingresos):
+    if len(ingresos) == 0:
+        print("No hay ingresos registrados.")
+        return
 
+    print("\n---------- LISTA DE INGRESOS ----------")
+
+    for ingreso in ingresos:
+        print("\nDNI: ", ingreso["dni"])
+        print("Cliente: ", ingreso["cliente"])
+        print("Celular: ", ingreso["celular"])
+        print("Marca: ", ingreso["marca"])
+        print("Modelo: ", ingreso["modelo"])
+        print("Numero de serie: ", ingreso["serie"])
+        print("Falla reportada: ", ingreso["falla"])
+        print("Presupuesto: S/.", ingreso["presupuesto"])
+        print("Fecha de ingreso: ", ingreso["fecha"])
+        print("Estado: ", ingreso["estado"])
                                         
 def actualizar_estado(ingresos):
     if len(ingresos) == 0:
@@ -237,7 +254,7 @@ def main():
             print("Pendiente")
 
         elif opcion == "5":
-            print("Pendiente")
+            listar_ingresos(ingresos)
 
         elif opcion == "6":
             print("Pendiente")
