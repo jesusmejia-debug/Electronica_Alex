@@ -244,6 +244,7 @@ def registrar_compra(compras):
 
 def main():
     ingresos = []
+    compras = []
     opcion = ""
 
     while opcion != "7":
