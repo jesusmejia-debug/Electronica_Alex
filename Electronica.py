@@ -225,6 +225,23 @@ def actualizar_estado(ingresos):
     print("No se encontro un televisor con ese numero de serie.")
 
 
+def registrar_compra(compras):
+    print("\n------- REGISTRO DE COMPRA DE REPUESTO -------")
+    dni = leer_dni()
+    repuesto = leer_texto("Descripcion del repuesto: ")
+    costo = leer_precio("Costo del repuesto (S/.): ")
+    fecha = leer_texto("Fecha de compra (dd/mm/aaaa): ")
+
+    compra = {
+        "dni": dni,
+        "repuesto": repuesto,
+        "costo": costo,
+        "fecha": fecha
+    }
+
+    compras.append(compra)
+    print("\nCompra de repuesto registrada correctamente.")
+
 def main():
     ingresos = []
     opcion = ""
@@ -251,7 +268,7 @@ def main():
             actualizar_estado(ingresos)
 
         elif opcion == "4":
-            print("Pendiente")
+            registrar_compra(compras)
 
         elif opcion == "5":
             listar_ingresos(ingresos)
