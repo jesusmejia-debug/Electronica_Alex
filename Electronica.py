@@ -275,13 +275,36 @@ def main():
             listar_ingresos(ingresos)
 
         elif opcion == "6":
-            print("Pendiente")
+            reporte_compras_ventas(ingresos, compras)
 
         elif opcion == "7":
             print("Hasta pronto.")
 
         else:
             print("Opcion invalida. Elija del 1 al 7.")
+def reporte_compras_ventas(ingresos, compras):
+    print("\n------- REPORTE DE COMPRAS Y VENTAS -------")
+    
+    total_compras = 0
+    for compra in compras:
+        total_compras += compra["costo"]
+        
+    total_ventas = 0
+    for ingreso in ingresos:
+        total_ventas += ingreso["presupuesto"]
+        
+    print(f"Total gastado en compras: S/. {total_compras:.2f}")
+    print(f"Total en presupuestos (ventas): S/. {total_ventas:.2f}")
+    balance = total_ventas - total_compras
+    print(f"Balance general: S/. {balance:.2f}")
+    
+    with open("reporte_compras_ventas.txt", "w", encoding="utf-8") as archivo:
+        archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
+        archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
+        archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
+        archivo.write(f"Balance: S/. {balance:.2f}\n")
+        
+    print("\nReporte generado y guardado en 'reporte_compras_ventas.txt' exitosamente.")
 
 if __name__ == "__main__":
     main()
