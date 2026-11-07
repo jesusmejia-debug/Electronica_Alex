@@ -61,6 +61,7 @@ def leer_precio(mensaje):
         except ValueError:
             print("Error: ingrese un precio valido.")
 
+#1. Registrar Ingreso de Televisor
 
 def registrar_ingreso(ingresos):
     print("\n------- REGISTRO DE TELEVISOR -------")
@@ -111,6 +112,7 @@ def registrar_ingreso(ingresos):
     print("DNI del cliente: ", dni)
     print("Codigo asignado: ", codigo)
 
+#2. Buscar Registros
 
 def buscar_registro(ingresos):
     if len(ingresos) == 0:
@@ -145,25 +147,9 @@ def buscar_registro(ingresos):
 
     if encontrados == 0:
         print("No se encontraron registros.")
-def listar_ingresos(ingresos):
-    if len(ingresos) == 0:
-        print("No hay ingresos registrados.")
-        return
 
-    print("\n---------- LISTA DE INGRESOS ----------")
+#3. Actualizar Estado  
 
-    for ingreso in ingresos:
-        print("\nDNI: ", ingreso["dni"])
-        print("Cliente: ", ingreso["cliente"])
-        print("Celular: ", ingreso["celular"])
-        print("Marca: ", ingreso["marca"])
-        print("Modelo: ", ingreso["modelo"])
-        print("Numero de serie: ", ingreso["serie"])
-        print("Falla reportada: ", ingreso["falla"])
-        print("Presupuesto: S/.", ingreso["presupuesto"])
-        print("Fecha de ingreso: ", ingreso["fecha"])
-        print("Estado: ", ingreso["estado"])
-                                        
 def actualizar_estado(ingresos):
     if len(ingresos) == 0:
         print("Todavia no hay televisores registrados.")
@@ -224,6 +210,7 @@ def actualizar_estado(ingresos):
 
     print("No se encontro un televisor con ese numero de serie.")
 
+#4. Registrar Compra de Repuesto
 
 def registrar_compra(compras):
     print("\n------- REGISTRO DE COMPRA DE REPUESTO -------")
@@ -241,6 +228,55 @@ def registrar_compra(compras):
 
     compras.append(compra)
     print("\nCompra de repuesto registrada correctamente.")
+
+#5. Listar Ingresos
+
+def listar_ingresos(ingresos):
+    if len(ingresos) == 0:
+        print("No hay ingresos registrados.")
+        return
+
+    print("\n---------- LISTA DE INGRESOS ----------")
+
+    for ingreso in ingresos:
+        print("\nDNI: ", ingreso["dni"])
+        print("Cliente: ", ingreso["cliente"])
+        print("Celular: ", ingreso["celular"])
+        print("Marca: ", ingreso["marca"])
+        print("Modelo: ", ingreso["modelo"])
+        print("Numero de serie: ", ingreso["serie"])
+        print("Falla reportada: ", ingreso["falla"])
+        print("Presupuesto: S/.", ingreso["presupuesto"])
+        print("Fecha de ingreso: ", ingreso["fecha"])
+        print("Estado: ", ingreso["estado"])
+
+#6. Reporte de Compras y Presupuestos
+
+def reporte_compras_ventas(ingresos, compras):
+    print("\n------- REPORTE DE COMPRAS Y VENTAS -------")
+    
+    total_compras = 0
+    for compra in compras:
+        total_compras += compra["costo"]
+        
+    total_ventas = 0
+    for ingreso in ingresos:
+        total_ventas += ingreso["presupuesto"]
+        
+    print(f"Total gastado en compras: S/. {total_compras:.2f}")
+    print(f"Total de presupuestos registrado: S/. {total_ventas:.2f}")
+    balance = total_ventas - total_compras
+    print(f"Balance general: S/. {balance:.2f}")
+    
+    with open("reporte_compras_ventas.txt", "w", encoding = "utf-8") as archivo:
+        archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
+        archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
+        archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
+        archivo.write(f"Balance: S/. {balance:.2f}\n")
+        
+    print("\nReporte generado y guardado en 'reporte_compras_ventas.txt' exitosamente.")
+
+#Menu Principal
 
 def main():
     ingresos = []
@@ -282,30 +318,7 @@ def main():
 
         else:
             print("Opcion invalida. Elija del 1 al 7.")
-def reporte_compras_ventas(ingresos, compras):
-    print("\n------- REPORTE DE COMPRAS Y VENTAS -------")
-    
-    total_compras = 0
-    for compra in compras:
-        total_compras += compra["costo"]
-        
-    total_ventas = 0
-    for ingreso in ingresos:
-        total_ventas += ingreso["presupuesto"]
-        
-    print(f"Total gastado en compras: S/. {total_compras:.2f}")
-    print(f"Total en presupuestos (ventas): S/. {total_ventas:.2f}")
-    balance = total_ventas - total_compras
-    print(f"Balance general: S/. {balance:.2f}")
-    
-    with open("reporte_compras_ventas.txt", "w", encoding="utf-8") as archivo:
-        archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
-        archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
-        archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
-        archivo.write(f"Balance: S/. {balance:.2f}\n")
-        
-    print("\nReporte generado y guardado en 'reporte_compras_ventas.txt' exitosamente.")
+            
 
 if __name__ == "__main__":
     main()
-
