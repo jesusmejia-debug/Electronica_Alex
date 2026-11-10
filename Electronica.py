@@ -234,7 +234,8 @@ def listar_ingresos(ingresos):
     print("\n---------- LISTA DE INGRESOS ----------")
     print("1. Ver todos")
     print("2. Filtrar por estado")
-    opcion = input("Elija una opcion (1-2): ").strip()
+    print("3. Resumen por estado")
+    opcion = input("Elija una opcion (1-3): ").strip()
 
     lista = list(ingresos)
     titulo = "TODOS LOS INGRESOS"
@@ -248,6 +249,14 @@ def listar_ingresos(ingresos):
             return
         lista = [x for x in ingresos if x["estado"].replace("ó", "o") == estados[e]]
         titulo = "ESTADO: " + estados[e].upper()
+    elif opcion == "3":
+        print("\n---------- RESUMEN POR ESTADO ----------")
+        for est in ("En reparacion", "Reparado", "Entregado"):
+            grupo = [x for x in ingresos if x["estado"].replace("ó", "o") == est]
+            suma = sum(x["presupuesto"] for x in grupo)
+            print(f"{est}: {len(grupo)} televisor(es) | S/. {suma:.2f}")
+        print(f"TOTAL: {len(ingresos)} televisor(es)")
+        return
     elif opcion != "1":
         print("Opcion invalida.")
         return
@@ -264,7 +273,7 @@ def listar_ingresos(ingresos):
         print(f"    Presupuesto: S/. {ingreso['presupuesto']:.2f} | Fecha: {ingreso['fecha']}")
         print(f"    Estado: {ingreso['estado']}")
     print(f"\nTotal presupuestos mostrados: S/. {sum(x['presupuesto'] for x in lista):.2f}")
-    
+
 
 #6. Reporte de Compras y Presupuestos
 
