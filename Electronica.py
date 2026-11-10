@@ -232,13 +232,39 @@ def listar_ingresos(ingresos):
         return
 
     print("\n---------- LISTA DE INGRESOS ----------")
-    for i, ingreso in enumerate(ingresos, 1):
+    print("1. Ver todos")
+    print("2. Filtrar por estado")
+    opcion = input("Elija una opcion (1-2): ").strip()
+
+    lista = list(ingresos)
+    titulo = "TODOS LOS INGRESOS"
+
+    if opcion == "2":
+        print("\n1. En reparacion  2. Reparado  3. Entregado")
+        e = input("Estado a mostrar (1-3): ").strip()
+        estados = {"1": "En reparacion", "2": "Reparado", "3": "Entregado"}
+        if e not in estados:
+            print("Opcion de estado invalida.")
+            return
+        lista = [x for x in ingresos if x["estado"].replace("ó", "o") == estados[e]]
+        titulo = "ESTADO: " + estados[e].upper()
+    elif opcion != "1":
+        print("Opcion invalida.")
+        return
+
+    if not lista:
+        print("No hay televisores con ese filtro.")
+        return
+
+    print(f"\n--- {titulo} ({len(lista)}) ---")
+    for i, ingreso in enumerate(lista, 1):
         print(f"\n[{i}] DNI: {ingreso['dni']} | Cliente: {ingreso['cliente']}")
         print(f"    {ingreso['marca']} {ingreso['modelo']} | Serie: {ingreso['serie']}")
         print(f"    Falla: {ingreso['falla']}")
         print(f"    Presupuesto: S/. {ingreso['presupuesto']:.2f} | Fecha: {ingreso['fecha']}")
         print(f"    Estado: {ingreso['estado']}")
-
+    print(f"\nTotal presupuestos mostrados: S/. {sum(x['presupuesto'] for x in lista):.2f}")
+    
 
 #6. Reporte de Compras y Presupuestos
 
