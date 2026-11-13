@@ -259,8 +259,11 @@ def listar_ingresos(ingresos):
         print(f"TOTAL: {len(ingresos)} televisor(es)")
         return
     elif opcion == "4":
-        marca = input("Marca a buscar: ").strip()
-        lista = [x for x in ingresos if x["marca"] == marca]
+        marca = input("Marca a buscar: ").strip().lower()
+        if marca == "":
+            print("Error: el campo no puede estar vacio.")
+            return
+        lista = [x for x in ingresos if marca in x["marca"].lower()]
         titulo = "MARCA: " + marca.upper()
     elif opcion != "1":
         print("Opcion invalida.")
