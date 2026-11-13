@@ -235,7 +235,8 @@ def listar_ingresos(ingresos):
     print("1. Ver todos")
     print("2. Filtrar por estado")
     print("3. Resumen por estado")
-    opcion = input("Elija una opcion (1-3): ").strip()
+    print("4. Filtrar por marca")
+    opcion = input("Elija una opcion (1-4): ").strip()
 
     lista = list(ingresos)
     titulo = "TODOS LOS INGRESOS"
@@ -257,6 +258,10 @@ def listar_ingresos(ingresos):
             print(f"{est}: {len(grupo)} televisor(es) | S/. {suma:.2f}")
         print(f"TOTAL: {len(ingresos)} televisor(es)")
         return
+    elif opcion == "4":
+        marca = input("Marca a buscar: ").strip()
+        lista = [x for x in ingresos if x["marca"] == marca]
+        titulo = "MARCA: " + marca.upper()
     elif opcion != "1":
         print("Opcion invalida.")
         return
