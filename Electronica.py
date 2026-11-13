@@ -236,7 +236,8 @@ def listar_ingresos(ingresos):
     print("2. Filtrar por estado")
     print("3. Resumen por estado")
     print("4. Filtrar por marca")
-    opcion = input("Elija una opcion (1-4): ").strip()
+    print("5. Filtrar por mes de ingreso")
+    opcion = input("Elija una opcion (1-5): ").strip()
 
     lista = list(ingresos)
     titulo = "TODOS LOS INGRESOS"
@@ -265,6 +266,10 @@ def listar_ingresos(ingresos):
             return
         lista = [x for x in ingresos if marca in x["marca"].lower()]
         titulo = "MARCA: " + marca.upper()
+    elif opcion == "5":
+        mes = input("Mes a consultar (mm/aaaa): ").strip()
+        lista = [x for x in ingresos if x["fecha"][3:] == mes]
+        titulo = "MES: " + mes
     elif opcion != "1":
         print("Opcion invalida.")
         return
