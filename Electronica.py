@@ -267,9 +267,18 @@ def listar_ingresos(ingresos):
         lista = [x for x in ingresos if marca in x["marca"].lower()]
         titulo = "MARCA: " + marca.upper()
     elif opcion == "5":
-        mes = input("Mes a consultar (mm/aaaa): ").strip()
-        lista = [x for x in ingresos if x["fecha"][3:] == mes]
-        titulo = "MES: " + mes
+        texto = input("Mes a consultar (mm/aaaa, ejemplo 11/2026): ").strip()
+        try:
+            mes = datetime.strptime(texto, "%m/%Y")
+        except ValueError:
+            print("Error: use el formato mm/aaaa (ejemplo: 11/2026).")
+            return
+        lista = []
+        for x in ingresos:
+            f = datetime.strptime(x["fecha"], "%d/%m/%Y")
+            if f.month == mes.month and f.year == mes.year:
+                lista.append(x)
+        titulo = "MES: " + texto
     elif opcion != "1":
         print("Opcion invalida.")
         return
