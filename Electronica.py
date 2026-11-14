@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import struct
 
 # Validaciones
 
@@ -243,24 +243,95 @@ def listar_ingresos(ingresos):
 #6. Reporte de Compras y Presupuestos
 
 def reporte_compras_ventas(ingresos, compras):
+
     print("\n------- REPORTE DE COMPRAS Y VENTAS -------")
 
+    # Calcular los totales
     total_compras = sum(c["costo"] for c in compras)
     total_ventas = sum(i["presupuesto"] for i in ingresos)
     balance = total_ventas - total_compras
 
-    print(f"Total gastado en compras: S/. {total_compras:.2f}")
+    # Mostrar resultados
+    print(f"\nTotal gastado en compras: S/. {total_compras:.2f}")
     print(f"Total de presupuestos registrado: S/. {total_ventas:.2f}")
     print(f"Balance general: S/. {balance:.2f}")
 
-    with open("reporte_compras_ventas.txt", "w", encoding="utf-8") as archivo:
-        archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
-        archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
-        archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
-        archivo.write(f"Balance: S/. {balance:.2f}\n")
+    # Submenú para elegir el tipo de archivo
+    while True:
+        print("\n------- GUARDAR REPORTE -------")
+        print("1. Guardar en archivo TXT")
+        print("2. Guardar en archivo BINARIO")
+        print("3. Ver registros guardados en TXT")
+        print("4. Regresar al menu principal")
 
-    print("\nReporte generado y guardado en 'reporte_compras_ventas.txt' exitosamente.")
+        opcion = input("\nSeleccione una opcion (1-4): ").strip()
 
+        # OPCION 1: Guardar en TXT
+        if opcion == "1":
+
+            with open("reporte_compras_ventas.txt", "w", encoding="utf-8") as archivo:
+                archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
+                archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
+                archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
+                archivo.write(f"Balance: S/. {balance:.2f}\n")
+
+            print("\nReporte guardado correctamente en TXT.")
+            print("\n--- DATOS GUARDADOS EN TXT ---")
+            with open("reporte_compras_ventas.txt", "r", encoding="utf-8") as archivo:
+                print(archivo.read())
+
+        # OPCION 2: Guardar en BINARIO
+        elif opcion == "2":
+
+            # Convertir los montos a centimos para guardar enteros
+            compras_centimos = round(total_compras * 100)
+            ventas_centimos = round(total_ventas * 100)
+            balance_centimos = round(balance * 100)
+
+            # Guardar los tres valores en formato binario
+            with open("reporte_compras_ventas.bin", "wb") as archivo:
+                archivo.write(struct.pack("<iii",
+                    compras_centimos,
+                    ventas_centimos,
+                    balance_centimos
+                ))
+
+            print("\nReporte guardado correctamente en BINARIO.")
+
+            # Leer el archivo binario para comprobar los datos
+            with open("reporte_compras_ventas.bin", "rb") as archivo:
+                bloque = archivo.read(12)
+
+                if len(bloque) != 12:
+                    print("Error: registro incompleto.")
+                else:
+                    compras_leidas, ventas_leidas, balance_leido = struct.unpack("<iii", bloque)
+
+                    print("\n--- DATOS LEIDOS DEL ARCHIVO BINARIO ---")
+                    print(f"Total Compras: S/. {compras_leidas / 100:.2f}")
+                    print(f"Total Ventas: S/. {ventas_leidas / 100:.2f}")
+                    print(f"Balance: S/. {balance_leido / 100:.2f}")
+            # OPCION 3: Ver registros guardados en TXT
+        elif opcion == "3":
+            print("\n--- REGISTROS GUARDADOS EN TXT ---")
+            try:
+                with open("reporte_compras_ventas.txt", "r", encoding="utf-8") as archivo:
+                    datos = archivo.read()
+
+                if datos:
+                    print(datos)
+                else:
+                    print("El archivo TXT esta vacio.")
+
+            except FileNotFoundError:
+                print("Todavia no existe un archivo TXT. Primero debe guardar un reporte.")
+
+        # OPCION 4: Regresar
+        elif opcion == "4":
+            print("\nRegresando al menu principal...")
+            break
+        else:
+            print("\nOpcion invalida. Elija del 1 al 4.")
 
 #Menu Principal
 

@@ -1,0 +1,4 @@
+=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===
+Total Compras: S/. 0.00
+Total Ventas (Ingresos): S/. 300.00
+Balance: S/. 300.00
