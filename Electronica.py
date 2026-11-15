@@ -1,3 +1,4 @@
+from modulo_personal import calcular_costo_recursivo
 from datetime import datetime
 import struct
 import json
@@ -359,14 +360,6 @@ def listar_ingresos(ingresos):
         print(f"    Cobrado: S/. {ingreso.get('cobrado', 0.0):.2f}")
         print(f"    Fecha: {ingreso['fecha']}")
         print(f"    Estado: {ingreso['estado']}")
-
-#Calcular compras mediante recursividad
-
-def calcular_costo_recursivo(compras, i=0):
-    if i >= len(compras):  
-        return 0.0
-    
-    return compras[i]["costo"] + calcular_costo_recursivo(compras, i + 1)
 
 #6. Reporte de Compras y Presupuestos
 
