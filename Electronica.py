@@ -1,5 +1,10 @@
 from datetime import datetime
 import struct
+import json
+
+#Archivos para guardar los registros
+ARCHIVO_INGRESOS = "ingresos.json"
+ARCHIVO_COMPRAS = "compras.json"
 
 # Validaciones
 
@@ -71,10 +76,51 @@ def leer_fecha(mensaje):
             return fecha
         print("Error: fecha invalida. Use el formato dd/mm/aaaa (ejemplo: 16/09/2026).")
 
+#Guardar y cargar informacion
+
+def guardar_datos(ingresos, compras):
+    try:
+        with open(ARCHIVO_INGRESOS, "w", encoding="utf-8") as archivo:
+            json.dump(ingresos, archivo, indent=4, ensure_ascii=False)
+
+        with open(ARCHIVO_COMPRAS, "w", encoding="utf-8") as archivo:
+            json.dump(compras, archivo, indent=4, ensure_ascii=False)
+
+        return True
+    
+    except OSError:
+        print("Error al guardar los archivos.")
+        return False
+
+def cargar_datos():
+    ingresos = []
+    compras = []
+
+    try:
+        with open(ARCHIVO_INGRESOS, "r", encoding="utf-8") as archivo:
+            ingresos = json.load(archivo)
+
+    except FileNotFoundError:
+        pass
+
+    except (json.JSONDecodeError, OSError):
+        print("No se pudieron cargar los ingresos.")
+
+    try:
+        with open(ARCHIVO_COMPRAS, "r", encoding="utf-8") as archivo:
+            compras = json.load(archivo)
+
+    except FileNotFoundError:
+        pass
+
+    except (json.JSONDecodeError, OSError):
+        print("No se pudieron cargar las compras.")
+
+    return ingresos, compras
 
 #1. Registrar Ingreso de Televisor
 
-def registrar_ingreso(ingresos):
+def registrar_ingreso(ingresos, compras):
     print("\n------- REGISTRO DE TELEVISOR -------")
 
     dni = leer_dni()
@@ -85,9 +131,10 @@ def registrar_ingreso(ingresos):
     serie = leer_texto("Número de serie: ")
 
     for ingreso in ingresos:
-        if ingreso["serie"].lower() == serie.lower() and ingreso["estado"] != "Entregado":
-            print("Error: el número de serie ya esta registrado y aun no ha sido entregado.")
-            return
+        if ingreso["serie"].lower() == serie.lower():
+            if ingreso["estado"] != "Entregado":
+                print("Error: el numero de serie ya esta registrado.")
+                return
 
     falla = leer_texto("Falla reportada: ")
     presupuesto = leer_precio("Presupuesto estimado de reparación (S/.): ")
@@ -102,14 +149,18 @@ def registrar_ingreso(ingresos):
         "serie": serie,
         "falla": falla,
         "presupuesto": presupuesto,
+        "cobrado": 0.0,
         "fecha": fecha,
-        "estado": "En reparación"
+        "estado": "En reparacion"
     }
 
     ingresos.append(ingreso)
+
+    guardar_datos(ingresos, compras)
+
     print("\nTelevisor registrado correctamente.")
     print(f"  Cliente: {cliente} | DNI: {dni}")
-    print(f"  Serie: {serie} | Estado: En reparación")
+    print(f"  Serie: {serie} | Estado: En reparacion")
 
 
 #2. Buscar Registros
@@ -132,7 +183,8 @@ def buscar_registro(ingresos):
         print("No se encontraron registros.")
         return
 
-    print(f"\nSe encontraron {len(encontrados)} registro(s):\n")
+    print(f"\nSe encontraron {len(encontrados)} registro(s):")
+
     for i, ingreso in enumerate(encontrados, 1):
         print(f"---------- REGISTRO {i} ----------")
         print(f"DNI:              {ingreso['dni']}")
@@ -150,12 +202,13 @@ def buscar_registro(ingresos):
 
 #3. Actualizar Estado
 
-def actualizar_estado(ingresos):
+def actualizar_estado(ingresos, compras):
     if not ingresos:
         print("Todavia no hay televisores registrados.")
         return
 
     dni = leer_dni()
+    
     encontrados = [i for i in ingresos if i["dni"] == dni]
 
     if not encontrados:
@@ -163,34 +216,65 @@ def actualizar_estado(ingresos):
         return
 
     print("\n---------- TELEVISORES DEL CLIENTE ----------")
-    for ingreso in encontrados:
-        print(f"{ingreso['marca']} {ingreso['modelo']} | Serie: {ingreso['serie']} | Estado: {ingreso['estado']}")
 
-    serie = leer_texto("\nIngrese el numero de serie del televisor a actualizar: ")
+    for ingreso in encontrados:
+        print(f"{ingreso['marca']} {ingreso['modelo']} | "
+              f"Serie: {ingreso['serie']} | Estado: {ingreso['estado']}")
+
+    serie = leer_texto("\nIngrese el numero de serie: ")
 
     for ingreso in encontrados:
         if ingreso["serie"].lower() == serie.lower():
+            
             print(f"\nEstado actual: {ingreso['estado']}")
-            print("1. En reparacion")
-            print("2. Reparado")
-            print("3. Entregado")
 
-            opcion = input("Seleccione el nuevo estado (1-3): ").strip()
+            if ingreso["estado"] == "En reparacion":
+                print("1. En reparacion")
+                print("2. Reparado")
 
-            estados = {
-                "1": "En reparacion",
-                "2": "Reparado",
-                "3": "Entregado"
-            }
+            elif ingreso["estado"] == "Reparado":
+                print("1. Reparado")
+                print("2. Entregado")
 
-            if opcion in estados:
-                ingreso["estado"] = estados[opcion]
-                print(f"\nEstado actualizado a: {ingreso['estado']}")
-
-                if ingreso["estado"] == "Reparado":
-                    print(f"Contactar al cliente al: {ingreso['celular']}")
             else:
-                print("Opción de estado invalida.")
+                print("Este televisor ya fue entregado.")
+                return
+
+            opcion = input("Seleccione el nuevo estado: ").strip()
+
+            if ingreso["estado"] == "En reparacion":
+                if opcion == "1":
+                    print("El televisor sigue en reparacion.")
+                    return
+
+                elif opcion == "2":
+                    ingreso["estado"] = "Reparado"
+
+                else:
+                    print("Opción invalida.")
+                    return
+
+            elif ingreso["estado"] == "Reparado":
+                if opcion == "1":
+                    print("El televisor sigue reparado.")
+                    return
+
+                elif opcion == "2":
+                    ingreso["estado"] = "Entregado"
+                    ingreso["cobrado"] = leer_precio(
+                        "Ingrese el importe cobrado (S/.): "
+                    )
+
+                else:
+                    print("Opción invalida.")
+                    return
+
+            print(f"\nEstado actualizado a: {ingreso['estado']}")
+
+            if ingreso["estado"] == "Reparado":
+                print(f"Contactar al cliente al: {ingreso['celular']}")
+
+            guardar_datos(ingresos, compras)
             return
 
     print("No se encontro un televisor con ese número de serie para este DNI.")
@@ -201,13 +285,43 @@ def actualizar_estado(ingresos):
 def registrar_compra(compras, ingresos):
     print("\n------- REGISTRO DE COMPRA DE REPUESTO -------")
 
+    if not ingresos:
+        print("Primero debe registrar un televisor.")
+        return
+
     dni = leer_dni()
 
-    existe = any(i["dni"] == dni for i in ingresos)
-    if not existe:
-        print("Error: no existe ningún televisor registrado con ese DNI.")
-        print("Primero debe registrar el ingreso del televisor.")
+    encontrados = [i for i in ingresos if i["dni"] == dni]
+
+    if not encontrados:
+        print("No existe ningun televisor registrado con ese DNI.")
         return
+
+    print("\n---------- TELEVISORES DEL CLIENTE ----------")
+
+    for ingreso in encontrados:
+        print(f"Serie: {ingreso['serie']} | "
+              f"{ingreso['marca']} {ingreso['modelo']} | "
+              f"Estado: {ingreso['estado']}")
+
+    serie = leer_texto("\nIngrese el numero de serie del televisor: ")
+
+    existe = False
+
+    for ingreso in encontrados:
+        if ingreso["serie"].lower() == serie.lower():
+            existe = True
+
+            if ingreso["estado"] == "Entregado":
+                print("No se pueden registrar repuestos para un equipo entregado.")
+                return
+
+            break
+
+    if not existe:
+        print("No se encontro ese numero de serie para el cliente.")
+        return
+            
 
     repuesto = leer_texto("Descripción del repuesto: ")
     costo = leer_precio("Costo del repuesto (S/.): ")
@@ -215,12 +329,16 @@ def registrar_compra(compras, ingresos):
 
     compra = {
         "dni": dni,
+        "serie": serie,
         "repuesto": repuesto,
         "costo": costo,
         "fecha": fecha
     }
 
     compras.append(compra)
+
+    guardar_datos(ingresos, compras)
+
     print("\nCompra de repuesto registrada correctamente.")
 
 
@@ -232,70 +350,23 @@ def listar_ingresos(ingresos):
         return
 
     print("\n---------- LISTA DE INGRESOS ----------")
-    print("1. Ver todos")
-    print("2. Filtrar por estado")
-    print("3. Resumen por estado")
-    print("4. Filtrar por marca")
-    print("5. Filtrar por mes de ingreso")
-    opcion = input("Elija una opcion (1-5): ").strip()
-
-    lista = list(ingresos)
-    titulo = "TODOS LOS INGRESOS"
-
-    if opcion == "2":
-        print("\n1. En reparacion  2. Reparado  3. Entregado")
-        e = input("Estado a mostrar (1-3): ").strip()
-        estados = {"1": "En reparacion", "2": "Reparado", "3": "Entregado"}
-        if e not in estados:
-            print("Opcion de estado invalida.")
-            return
-        lista = [x for x in ingresos if x["estado"].replace("ó", "o") == estados[e]]
-        titulo = "ESTADO: " + estados[e].upper()
-    elif opcion == "3":
-        print("\n---------- RESUMEN POR ESTADO ----------")
-        for est in ("En reparacion", "Reparado", "Entregado"):
-            grupo = [x for x in ingresos if x["estado"].replace("ó", "o") == est]
-            suma = sum(x["presupuesto"] for x in grupo)
-            print(f"{est}: {len(grupo)} televisor(es) | S/. {suma:.2f}")
-        print(f"TOTAL: {len(ingresos)} televisor(es)")
-        return
-    elif opcion == "4":
-        marca = input("Marca a buscar: ").strip().lower()
-        if marca == "":
-            print("Error: el campo no puede estar vacio.")
-            return
-        lista = [x for x in ingresos if marca in x["marca"].lower()]
-        titulo = "MARCA: " + marca.upper()
-    elif opcion == "5":
-        texto = input("Mes a consultar (mm/aaaa, ejemplo 11/2026): ").strip()
-        try:
-            mes = datetime.strptime(texto, "%m/%Y")
-        except ValueError:
-            print("Error: use el formato mm/aaaa (ejemplo: 11/2026).")
-            return
-        lista = []
-        for x in ingresos:
-            f = datetime.strptime(x["fecha"], "%d/%m/%Y")
-            if f.month == mes.month and f.year == mes.year:
-                lista.append(x)
-        titulo = "MES: " + texto
-    elif opcion != "1":
-        print("Opcion invalida.")
-        return
-
-    if not lista:
-        print("No hay televisores con ese filtro.")
-        return
-
-    print(f"\n--- {titulo} ({len(lista)}) ---")
-    for i, ingreso in enumerate(lista, 1):
+    
+    for i, ingreso in enumerate(ingresos, 1):
         print(f"\n[{i}] DNI: {ingreso['dni']} | Cliente: {ingreso['cliente']}")
         print(f"    {ingreso['marca']} {ingreso['modelo']} | Serie: {ingreso['serie']}")
         print(f"    Falla: {ingreso['falla']}")
-        print(f"    Presupuesto: S/. {ingreso['presupuesto']:.2f} | Fecha: {ingreso['fecha']}")
+        print(f"    Presupuesto: S/. {ingreso['presupuesto']:.2f}")
+        print(f"    Cobrado: S/. {ingreso.get('cobrado', 0.0):.2f}")
+        print(f"    Fecha: {ingreso['fecha']}")
         print(f"    Estado: {ingreso['estado']}")
-    print(f"\nTotal presupuestos mostrados: S/. {sum(x['presupuesto'] for x in lista):.2f}")
 
+#Calcular compras mediante recursividad
+
+def calcular_costo_recursivo(compras, i=0):
+    if i >= len(compras):  
+        return 0.0
+    
+    return compras[i]["costo"] + calcular_costo_recursivo(compras, i + 1)
 
 #6. Reporte de Compras y Presupuestos
 
@@ -304,13 +375,18 @@ def reporte_compras_ventas(ingresos, compras):
     print("\n------- REPORTE DE COMPRAS Y VENTAS -------")
 
     # Calcular los totales
-    total_compras = sum(c["costo"] for c in compras)
-    total_ventas = sum(i["presupuesto"] for i in ingresos)
+    total_compras = calcular_costo_recursivo(compras)
+
+    total_presupuestos = sum(i["presupuesto"] for i in ingresos)
+
+    total_ventas = sum(i.get("cobrado", 0.0) for i in ingresos)
+    
     balance = total_ventas - total_compras
 
     # Mostrar resultados
     print(f"\nTotal gastado en compras: S/. {total_compras:.2f}")
-    print(f"Total de presupuestos registrado: S/. {total_ventas:.2f}")
+    print(f"Total de presupuestos registrado: S/. {total_presupuestos:.2f}")
+    print(f"Total de ventas registradas: S/. {total_ventas:.2f}")
     print(f"Balance general: S/. {balance:.2f}")
 
     # Submenú para elegir el tipo de archivo
@@ -329,12 +405,14 @@ def reporte_compras_ventas(ingresos, compras):
             with open("reporte_compras_ventas.txt", "w", encoding="utf-8") as archivo:
                 archivo.write("=== REPORTE DE COMPRAS Y VENTAS - ELECTRONICA ALEX ===\n")
                 archivo.write(f"Total Compras: S/. {total_compras:.2f}\n")
-                archivo.write(f"Total Ventas (Ingresos): S/. {total_ventas:.2f}\n")
+                archivo.write(f"Total Presupuestos: S/. {total_presupuestos:.2f}\n")
+                archivo.write(f"Total Cobrado: S/. {total_ventas:.2f}\n")
                 archivo.write(f"Balance: S/. {balance:.2f}\n")
 
             print("\nReporte guardado correctamente en TXT.")
-            print("\n--- DATOS GUARDADOS EN TXT ---")
+
             with open("reporte_compras_ventas.txt", "r", encoding="utf-8") as archivo:
+                print("\n--- DATOS LEIDOS DEL ARCHIVO TXT ---")
                 print(archivo.read())
 
         # OPCION 2: Guardar en BINARIO
@@ -343,12 +421,14 @@ def reporte_compras_ventas(ingresos, compras):
             # Convertir los montos a centimos para guardar enteros
             compras_centimos = round(total_compras * 100)
             ventas_centimos = round(total_ventas * 100)
+            presupuestos_centimos = round(total_presupuestos * 100)
             balance_centimos = round(balance * 100)
 
-            # Guardar los tres valores en formato binario
+            # Guardar los cuatro valores en formato binario
             with open("reporte_compras_ventas.bin", "wb") as archivo:
-                archivo.write(struct.pack("<iii",
+                archivo.write(struct.pack("<iiii",
                     compras_centimos,
+                    presupuestos_centimos,
                     ventas_centimos,
                     balance_centimos
                 ))
@@ -356,21 +436,27 @@ def reporte_compras_ventas(ingresos, compras):
             print("\nReporte guardado correctamente en BINARIO.")
 
             # Leer el archivo binario para comprobar los datos
-            with open("reporte_compras_ventas.bin", "rb") as archivo:
-                bloque = archivo.read(12)
 
-                if len(bloque) != 12:
+            with open("reporte_compras_ventas.bin", "rb") as archivo:
+                bloque = archivo.read(16)
+
+                if len(bloque) != 16:
                     print("Error: registro incompleto.")
                 else:
-                    compras_leidas, ventas_leidas, balance_leido = struct.unpack("<iii", bloque)
+                    compras_leidas, presupuestos_leidos, ventas_leidas, balance_leido = struct.unpack("<iiii", bloque)
 
                     print("\n--- DATOS LEIDOS DEL ARCHIVO BINARIO ---")
                     print(f"Total Compras: S/. {compras_leidas / 100:.2f}")
-                    print(f"Total Ventas: S/. {ventas_leidas / 100:.2f}")
+                    print(f"Total Presupuestos: S/. {presupuestos_leidos / 100:.2f}")
+                    print(f"Total Cobrado: S/. {ventas_leidas / 100:.2f}")
                     print(f"Balance: S/. {balance_leido / 100:.2f}")
-            # OPCION 3: Ver registros guardados en TXT
+
+        # OPCION 3: Ver registros guardados en TXT
+
         elif opcion == "3":
+
             print("\n--- REGISTROS GUARDADOS EN TXT ---")
+
             try:
                 with open("reporte_compras_ventas.txt", "r", encoding="utf-8") as archivo:
                     datos = archivo.read()
@@ -384,19 +470,26 @@ def reporte_compras_ventas(ingresos, compras):
                 print("Todavia no existe un archivo TXT. Primero debe guardar un reporte.")
 
         # OPCION 4: Regresar
+
         elif opcion == "4":
             print("\nRegresando al menu principal...")
             break
+
         else:
             print("\nOpcion invalida. Elija del 1 al 4.")
 
 #Menu Principal
 
 def main():
-    ingresos = []
-    compras = []
+
+    ingresos, compras = cargar_datos()
+
+    print("\nDatos anteriores cargados correctamente.")
+    print(f"Televisores registrados: {len(ingresos)}")
+    print(f"Compras registradas: {len(compras)}")
 
     while True:
+
         print("\n========== ELECTRONICA ALEX ==========")
         print("1. Registrar ingreso de televisor")
         print("2. Buscar registro por DNI, nombre o celular")
@@ -409,13 +502,13 @@ def main():
         opcion = input("\nElija una opción (1-7): ").strip()
 
         if opcion == "1":
-            registrar_ingreso(ingresos)
+            registrar_ingreso(ingresos, compras)
 
         elif opcion == "2":
             buscar_registro(ingresos)
 
         elif opcion == "3":
-            actualizar_estado(ingresos)
+            actualizar_estado(ingresos, compras)
 
         elif opcion == "4":
             registrar_compra(compras, ingresos)
@@ -427,6 +520,8 @@ def main():
             reporte_compras_ventas(ingresos, compras)
 
         elif opcion == "7":
+            guardar_datos(ingresos, compras)
+            print("\nGuardando datos espere un momento...")
             print("Hasta pronto.")
             break
 
