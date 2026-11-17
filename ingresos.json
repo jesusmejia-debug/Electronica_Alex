@@ -1,0 +1,15 @@
+[
+    {
+        "dni": "61313486",
+        "cliente": "Rosa",
+        "celular": "992885879",
+        "marca": "LG",
+        "modelo": "3324",
+        "serie": "L5424",
+        "falla": "Falla en los leds",
+        "presupuesto": 300.0,
+        "cobrado": 0.0,
+        "fecha": "13/11/2026",
+        "estado": "En reparacion"
+    }
+]
